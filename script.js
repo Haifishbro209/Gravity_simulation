@@ -82,7 +82,9 @@ function handleParticles() {
         } else {
             particleArray[i].update();
             physics(i);
-            particleArray[i].draw();
+            if (particleArray[i]) {
+                particleArray[i].draw();
+            }
         }
     }
 }
