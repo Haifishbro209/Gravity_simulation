@@ -110,6 +110,9 @@ function physics(index) {
         console.log(dx);
         let distance = Math.hypot(dx,dy);
         console.log(`DISTANCE ====${distance}`);
+
+
+
         let collison = distance < (particle.size + particleArray[i].size);
         if(collison){
             console.log('collision');
@@ -125,12 +128,69 @@ function physics(index) {
                     particleArray.splice(index,1);
                     break;
                 }
+            }else{
+                let m1 = particle.size;
+                let vx1 = particle.speedX;
+                let vy1 = particle.speedY;
+                let x1 = particle.x;
+                let y1 = particle.y;
+                let m2 = particleArray[i].size;
+                let vx2 = particleArray[i].speedX;
+                let vy2 = particleArray[i].speedY;
+                let x2 = particleArray[i].x;
+                let y2 = particleArray[i].y;
+
+                new_velocities=[[vx1New, vy1New], [vx2New, vy2New]] = calculate_collision(m1, vx1, vy1, x1, y1, m2, vx2, vy2, x2, y2);
+
+                particleArray[index].speedX = new_velocities[0][0];
+                particleArray[index].speedY= new_velocities[0][1];
+
             }
         }
     
     }
 }
 
+function calculate_collision(m1, vx1, vy1, x1, y1, m2, vx2, vy2, x2, y2) {
+    // Step 1: Calculate normal vector
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const d = Math.sqrt(dx * dx + dy * dy);
+    
+    // Avoid division by zero (if positions are the same, no collision change)
+    if (d === 0) {
+        return [[vx1, vy1], [vx2, vy2]];
+    }
+    
+    const nx = dx / d;
+    const ny = dy / d;
+    
+    // Tangential vector (perpendicular to normal)
+    const tx = -ny;
+    const ty = nx;
+    
+    // Step 2: Decompose velocities into normal and tangential components
+    const v1n = vx1 * nx + vy1 * ny;
+    const v1t = vx1 * tx + vy1 * ty;
+    const v2n = vx2 * nx + vy2 * ny;
+    const v2t = vx2 * tx + vy2 * ty;
+    
+    // Step 3: Calculate new normal components for elastic collision
+    const v1nNew = (m1 - m2) / (m1 + m2) * v1n + (2 * m2) / (m1 + m2) * v2n;
+    const v2nNew = (2 * m1) / (m1 + m2) * v1n + (m2 - m1) / (m1 + m2) * v2n;
+    
+    // Tangential components remain unchanged
+    const v1tNew = v1t;
+    const v2tNew = v2t;
+    
+    // Step 4: Reconstruct new velocity vectors
+    const vx1New = v1nNew * nx + v1tNew * tx;
+    const vy1New = v1nNew * ny + v1tNew * ty;
+    const vx2New = v2nNew * nx + v2tNew * tx;
+    const vy2New = v2nNew * ny + v2tNew * ty;
+    
+    return [[vx1New, vy1New], [vx2New, vy2New]];
+}
 
 function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
