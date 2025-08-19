@@ -3,7 +3,7 @@ const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 const particleArray = [];
-const hues = [60,60,60]//,120,180,240,300,360]
+const hues = [60,120,180,240,300,360]
 
 
 window.addEventListener('resize', function () {
@@ -145,6 +145,8 @@ function physics(index) {
                 particleArray[index].speedX = new_velocities[0][0];
                 particleArray[index].speedY= new_velocities[0][1];
 
+                particleArray[i].speedX = new_velocities[1][0];
+                particleArray[i].speedY = new_velocities[1][1];
             }
         }
     
