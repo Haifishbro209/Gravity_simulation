@@ -1,3 +1,5 @@
+const { pass } = require("three/tsl");
+
 const canvas = document.getElementById('canvas1');
 const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
@@ -36,9 +38,9 @@ class Particle {
         this.speedX = Math.random() * 2 - 1; //+1,5 bis -1.5
         this.speedY = Math.random() * 2 - 1;
         this.speedSqr = this.speedX * this.speedX + this.speedY * this.speedY;
-        this.dxCenter = 0;
-        this.dyCenter = 0;
-        this.distanceToCenter = 0;
+        //this.dxCenter = 0;
+        //this.dyCenter = 0;
+        //this.distanceToCenter = 0;
         let hue = Math.round(Math.random() * 360)
         this.color = 'hsl(' + hue + ', 100%, 50%)';
         this.size = Math.round(Math.random() * 20);
@@ -48,9 +50,10 @@ class Particle {
     update() {
         this.x += this.speedX;
         this.y += this.speedY;
-        this.dxCenter = Math.abs(this.x - canvas.width / 2);
-        this.dyCenter = Math.abs(this.y - canvas.height / 2);
-        this.distanceToCenter = Math.sqrt(this.dxCenter * this.dxCenter + this.dyCenter * this.dyCenter);
+        //this.dxCenter = Math.abs(this.x - canvas.width / 2);
+        //this.dyCenter = Math.abs(this.y - canvas.height / 2);
+        //this.distanceToCenter = Math.sqrt(this.dxCenter * this.dxCenter + this.dyCenter * this.dyCenter);
+        //this.size -= 0.03;
     }
 
     draw() {
@@ -75,8 +78,9 @@ function init(x, y) {
 function handleParticles() {
     for (let i = 0; i < particleArray.length; i++) {
         let s = (particleArray[i].size / 2)
+        let too_small = particleArray[i].size < 1;
         if (particleArray[i].x > canvas.x + s || particleArray[i].y > canvas.y + s ||
-            particleArray[i].x < 0 - s || particleArray[i].y < 0 - s) {
+            particleArray[i].x < 0 - s || particleArray[i].y < 0 - s || too_small) {
             
             particleArray.splice(i, 1);
             i--;
@@ -88,6 +92,22 @@ function handleParticles() {
     }
 }
 
+function gravity(index){
+    let particle = particleArray[index]
+    let x = particle.x
+    let y = particle.y
+
+
+    if (particleArray.length < 2) return;
+
+    for( let i = 0;i ++; i < particleArray.length){
+        if (i == index && index != particleArray.length) i ++;
+        if (i == particleArray.length) break;
+
+
+    
+    }
+}
 
 function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
