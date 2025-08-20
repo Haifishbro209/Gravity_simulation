@@ -5,7 +5,6 @@ canvas.height = window.innerHeight;
 const particleArray = [];
 const hues = [60,120, 180, 240, 300, 360];
 
-// Gravitationskonstante (angepasst für die Simulation)
 const G = 0.2;
 
 
@@ -254,10 +253,11 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
+/*
 for(let i = 0; i < 120; i++){
     let x = Math.round(Math.random()*canvas.width);
     let y = Math.round(Math.random()*canvas.height);
     init(x,y);
-}
+}*/
 
 animate();
