@@ -3,7 +3,10 @@ const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 const particleArray = [];
-const hues = [60, 120, 180, 240, 300, 360]
+const hues = [60,120, 180, 240, 300, 360];
+
+// Gravitationskonstante (angepasst für die Simulation)
+const G = 0.2;
 
 
 
@@ -41,17 +44,25 @@ class Particle {
         this.speed = Math.sqrt(this.speedX * this.speedX + this.speedY * this.speedY);
         let hue = hues[Math.round(Math.random() * hues.length)];        // Math.round(Math.random() * 360)
         this.color = 'hsl(' + hue + ', 100%, 50%)';
-        // Größe nur einmal setzen (Radius)
         this.size = Math.round(Math.random() * 20) || 1;
         this.E_kin = (this.speed ** 2) * 0.5 * this.size;
+        this.mass = Math.PI *this.size * this.size; 
+        this.accelerationX = 0;
+        this.accelerationY = 0;
     }
 
     update() {
+        this.speedX += this.accelerationX;
+        this.speedY += this.accelerationY;
+        
         this.x += this.speedX;
         this.y += this.speedY;
+        
         this.speed = Math.sqrt(this.speedX * this.speedX + this.speedY * this.speedY);
-        this.E_kin = (this.speed ** 2) * 0.5 * this.size// kinetic energy
+        this.E_kin = (this.speed ** 2) * 0.5 * this.mass; 
 
+        this.accelerationX = 0;
+        this.accelerationY = 0;
     }
 
     draw() {
@@ -75,7 +86,48 @@ function init(x, y) {
     console.log(particleArray.length);
 }
 
+// Gravitationsfunktion - implementiert Newton's Gravitationsgesetz
+// F = G * m1 * m2 / r²
+// Die Kraft wird in Beschleunigung umgewandelt: a = F / m
+function applyGravity() {
+    for (let i = 0; i < particleArray.length; i++) {
+        let particle1 = particleArray[i];
+        
+        for (let j = i + 1; j < particleArray.length; j++) {
+            let particle2 = particleArray[j];
+            
+            // Abstand zwischen den Teilchen berechnen
+            let dx = particle2.x - particle1.x;
+            let dy = particle2.y - particle1.y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // Minimaler Abstand um Division durch Null zu vermeiden
+            // und zu starke Kräfte bei sehr kleinen Abständen zu verhindern
+            let minDistance = Math.max(distance, particle1.size + particle2.size);
+            
+            // Gravitationskraft berechnen: F = G * m1 * m2 / r²
+            let force = G * particle1.mass * particle2.mass / (minDistance * minDistance);
+            
+            // Einheitsvektor in Richtung der Kraft
+            let forceX = force * (dx / minDistance);
+            let forceY = force * (dy / minDistance);
+            
+            // Beschleunigung = Kraft / Masse (F = ma, also a = F/m)
+            // particle1 wird zu particle2 hingezogen
+            particle1.accelerationX += forceX / particle1.mass;
+            particle1.accelerationY += forceY / particle1.mass;
+            
+            // particle2 wird zu particle1 hingezogen (Newton's 3. Gesetz)
+            particle2.accelerationX -= forceX / particle2.mass;
+            particle2.accelerationY -= forceY / particle2.mass;
+        }
+    }
+}
+
 function handleParticles() {
+    // Erst Gravitationskräfte für alle Teilchen berechnen
+    applyGravity();
+    
     for (let i = 0; i < particleArray.length; i++) {
         let s = (particleArray[i].size / 2);
         let too_small = particleArray[i].size < 1;
@@ -121,20 +173,22 @@ function physics(index) {
                 let combined_radius = Math.sqrt(combined_area / Math.PI);
                 if (particle.size > particleArray[i].size) {
                     particle.size = combined_radius;
+                    particle.mass = particle.size * particle.size; // Masse aktualisieren
                     particleArray.splice(i, 1);
                     i--;
                 } else {
                     particleArray[i].size = combined_radius;
+                    particleArray[i].mass = particleArray[i].size * particleArray[i].size; // Masse aktualisieren
                     particleArray.splice(index, 1);
                     break;
                 }
             } else {
-                let m1 = particle.size;
+                let m1 = particle.mass;  // Verwende mass statt size
                 let vx1 = particle.speedX;
                 let vy1 = particle.speedY;
                 let x1 = particle.x;
                 let y1 = particle.y;
-                let m2 = particleArray[i].size;
+                let m2 = particleArray[i].mass;  // Verwende mass statt size
                 let vx2 = particleArray[i].speedX;
                 let vy2 = particleArray[i].speedY;
                 let x2 = particleArray[i].x;
