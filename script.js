@@ -3,7 +3,7 @@ const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 const particleArray = [];
-const hues = [60,120, 180, 240, 300, 360];
+const hues = [60, 120, 180, 240, 300, 360];
 
 const G = 0.2;
 
@@ -45,7 +45,7 @@ class Particle {
         this.color = 'hsl(' + hue + ', 100%, 50%)';
         this.size = Math.round(Math.random() * 20) || 1;
         this.E_kin = (this.speed ** 2) * 0.5 * this.size;
-        this.mass = Math.PI *this.size * this.size; 
+        this.mass = Math.PI * this.size * this.size;
         this.accelerationX = 0;
         this.accelerationY = 0;
     }
@@ -53,12 +53,12 @@ class Particle {
     update() {
         this.speedX += this.accelerationX;
         this.speedY += this.accelerationY;
-        
+
         this.x += this.speedX;
         this.y += this.speedY;
-        
+
         this.speed = Math.sqrt(this.speedX * this.speedX + this.speedY * this.speedY);
-        this.E_kin = (this.speed ** 2) * 0.5 * this.mass; 
+        this.E_kin = (this.speed ** 2) * 0.5 * this.mass;
 
         this.accelerationX = 0;
         this.accelerationY = 0;
@@ -81,7 +81,7 @@ function init(x, y) {
         let s = p.size;
         if (x < p.x + s && x > p.x - s && y < p.y + s && y > p.y - s) allowed = false;
     }
-    if(allowed) particleArray.push(new Particle(x, y));
+    if (allowed) particleArray.push(new Particle(x, y));
     console.log(particleArray.length);
 }
 
@@ -91,31 +91,31 @@ function init(x, y) {
 function applyGravity() {
     for (let i = 0; i < particleArray.length; i++) {
         let particle1 = particleArray[i];
-        
+
         for (let j = i + 1; j < particleArray.length; j++) {
             let particle2 = particleArray[j];
-            
+
             // Abstand zwischen den Teilchen berechnen
             let dx = particle2.x - particle1.x;
             let dy = particle2.y - particle1.y;
             let distance = Math.sqrt(dx * dx + dy * dy);
-            
+
             // Minimaler Abstand um Division durch Null zu vermeiden
             // und zu starke Kräfte bei sehr kleinen Abständen zu verhindern
             let minDistance = Math.max(distance, particle1.size + particle2.size);
-            
+
             // Gravitationskraft berechnen: F = G * m1 * m2 / r²
             let force = G * particle1.mass * particle2.mass / (minDistance * minDistance);
-            
+
             // Einheitsvektor in Richtung der Kraft
             let forceX = force * (dx / minDistance);
             let forceY = force * (dy / minDistance);
-            
+
             // Beschleunigung = Kraft / Masse (F = ma, also a = F/m)
             // particle1 wird zu particle2 hingezogen
             particle1.accelerationX += forceX / particle1.mass;
             particle1.accelerationY += forceY / particle1.mass;
-            
+
             // particle2 wird zu particle1 hingezogen (Newton's 3. Gesetz)
             particle2.accelerationX -= forceX / particle2.mass;
             particle2.accelerationY -= forceY / particle2.mass;
@@ -126,7 +126,7 @@ function applyGravity() {
 function handleParticles() {
     // Erst Gravitationskräfte für alle Teilchen berechnen
     applyGravity();
-    
+
     for (let i = 0; i < particleArray.length; i++) {
         let s = (particleArray[i].size / 2);
         let too_small = particleArray[i].size < 1;
@@ -182,18 +182,18 @@ function physics(index) {
                     break;
                 }
             } else {
-                let m1 = particle.mass;  // Verwende mass statt size
+                let m1 = particle.mass;
                 let vx1 = particle.speedX;
                 let vy1 = particle.speedY;
                 let x1 = particle.x;
                 let y1 = particle.y;
-                let m2 = particleArray[i].mass;  // Verwende mass statt size
+                let m2 = particleArray[i].mass;
                 let vx2 = particleArray[i].speedX;
                 let vy2 = particleArray[i].speedY;
                 let x2 = particleArray[i].x;
                 let y2 = particleArray[i].y;
 
-                new_velocities = [[vx1New, vy1New], [vx2New, vy2New]] = calculate_collision(m1, vx1, vy1, x1, y1, m2, vx2, vy2, x2, y2);
+                new_velocities = calculate_collision(m1, vx1, vy1, x1, y1, m2, vx2, vy2, x2, y2);
 
                 particleArray[index].speedX = new_velocities[0][0];
                 particleArray[index].speedY = new_velocities[0][1];
@@ -247,9 +247,20 @@ function calculate_collision(m1, vx1, vy1, x1, y1, m2, vx2, vy2, x2, y2) {
     return [[vx1New, vy1New], [vx2New, vy2New]];
 }
 
+let path_array = []
+
 function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'rgba(0,0,0,1)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    /*for (let i = 0; i < particleArray.length; i++) {
+        path_array.push([particleArray[i].x, particleArray[i].y]);
+    }
+    for (let i = 0; i < path_array; i++) {
+        ctx.fillStyle = '#ffffff'; // weiß
+        ctx.fillRect(Math.floor(path_array[i][0]), Math.floor(path_array[i][1]), 1, 1);
+    }*/
     handleParticles();
+
     requestAnimationFrame(animate);
 }
 
@@ -259,5 +270,15 @@ for(let i = 0; i < 120; i++){
     let y = Math.round(Math.random()*canvas.height);
     init(x,y);
 }*/
+
+particleArray.push(new Particle(900, 500));
+particleArray[0].size = 15;
+particleArray[0].speedX = 0;
+particleArray[0].speedY = 0;
+
+particleArray.push(new Particle(950, 500));
+particleArray[1].size = 10;
+particleArray[1].speedX = 0;
+particleArray[1].speedY = 1;
 
 animate();
